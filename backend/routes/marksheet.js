@@ -13,8 +13,8 @@ import { count, error } from 'console';
     try {
         console.log('Fired!');
         const result = await Marksheet.updateMany({ stream: 'bcom' }, { $set: { stream: 'BCOM' } });
-        console.log('Total documents matched:', result.n);
-        console.log('Total documents modified:', result.nModified);
+        // console.log('Total documents matched:', result.n);
+        // console.log('Total documents modified:', result.nModified);
     } catch (error) {
         console.error(error);
     } finally {
@@ -22,6 +22,40 @@ import { count, error } from 'console';
         // mongoose.disconnect();
     }
 })();
+
+
+
+
+// async function fetchDocuments() {
+// console.log('fired')
+//     const PAGE_SIZE = 70000; // Adjust the page size as needed
+//     let pageNumber = 1;
+//     try {
+//         let marksheetArr = [];
+//         let documents = await Marksheet.find()
+//             .skip((pageNumber - 1) * PAGE_SIZE)
+//             .limit(PAGE_SIZE);
+
+//         while (documents.length > 0) {
+//             console.log(marksheetArr.length)
+//             marksheetArr = marksheetArr.concat(documents);
+//             pageNumber++;
+//             documents = await Marksheet.find()
+//                 .skip((pageNumber - 1) * PAGE_SIZE)
+//                 .limit(PAGE_SIZE);
+//         }
+
+//         // Now marksheetArr contains all documents
+//         console.log(marksheetArr);
+//         return marksheetArr;
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }
+
+// fetchDocuments();
+
+
 
 
 function getLetterGrade(subjectPercent) {
@@ -275,9 +309,11 @@ const router = express.Router();
 // ROUTE 1: Get all the marksheets using: GET "/api/marksheet". Login required
 router.get('/fetch-all-sem-marksheets', fetchuser, async (req, res) => {
 
-    const marksheetList = await Marksheet.find()
+    const marksheetList = await Marksheet.find().lean();
+    console.log(marksheetList.length)
     for (let i = 0; i < marksheetList.length; i++) {
         marksheetList[i] = await handleOldOperation(marksheetList[i]);
+
     }
     // console.log(marksheetList)
     res.status(200).json(marksheetList);
@@ -474,7 +510,7 @@ router.post('/filter', fetchuser, async (req, res) => {
         let marksheetList = [];
         if (stream.toUpperCase() === 'BCOM') {
             marksheetList = await Marksheet.find({ course, semester, year });
-            marksheetList = marksheetList.filter(element=>element.stream.toLowerCase()===stream.toLowerCase());
+            marksheetList = marksheetList.filter(element => element.stream.toLowerCase() === stream.toLowerCase());
         }
         else {
             marksheetList = await Marksheet.find({ stream: stream.toUpperCase(), semester });
@@ -558,7 +594,7 @@ router.post('/filter', fetchuser, async (req, res) => {
                 }
                 element["ngp"] = element.total / 10;
                 let percent = (element.total * 100) / element.fullMarks;
-                element["status"] = percent > 30 ? 'P': 'F';
+                element["status"] = percent > 30 ? 'P' : 'F';
 
                 let fullMarkssum = 0;
                 let totalMarksObtained = 0;
@@ -603,7 +639,9 @@ router.post('/filter', fetchuser, async (req, res) => {
 router.get('/stats', fetchuser, async (req, res) => {
     // await handleOldOperation();
     try {
+        console.log('fetching all')
         let marksheetArr = await Marksheet.find();
+        console.log('fetched');
         // console.log(marksheetArr)
         const obj = {
             totalMarksheets: marksheetArr.length,
@@ -622,6 +660,7 @@ router.get('/stats', fetchuser, async (req, res) => {
             else if (marksheetArr[i].stream.toUpperCase() === "BSC") { // For BSC
                 obj.bsc += 1;
             }
+            console.log(i + 1);
         }
 
         return res.status(200).json(obj);
@@ -670,9 +709,45 @@ router.get('/special-subjects', fetchuser, async (req, res) => {
 })
 
 
+async function getFormatedDataForSearch(year, stream, sem, rollNo, uid, phone, name, registrationNo) {
 
-// ROUTE 8: Get the report for the given rollNo using: POST "/api/marksheet/search-report". Login required
-router.post('/search-report', [
+    const currentModuleURL = import.meta.url;
+    const currentModulePath = fileURLToPath(currentModuleURL);
+
+
+    console.log(rollNo, sem, year, stream);
+
+    let filePath = path.join(path.dirname(currentModulePath), '..', '..', 'data', `${year}`, `${stream}`, `${sem}`, `${rollNo}.pdf`);
+    console.log(filePath);
+    try {
+        let obj = { year: year, stream: stream, semester: sem, uid: uid, phone: phone, name: name, registrationNo: registrationNo };
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            const fileStream = fs.createReadStream(filePath);
+            // Convert the fileStream to a Buffer and add it to the obj
+            const buffers = [];
+            for await (const chunk of fileStream) {
+                buffers.push(chunk);
+            }
+            const pdfBuffer = Buffer.concat(buffers);
+
+            obj["pdf"] = pdfBuffer;
+
+            return obj;
+
+        } else {
+            return null;
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+
+// ROUTE 8: Get all the marksheets for the given rollNo using: POST "/api/marksheet/search". Login required
+router.post('/search', [
     body('rollNo', 'Enter a valid rollNo').exists()
 ], fetchuser, async (req, res) => {
 
@@ -691,49 +766,22 @@ router.post('/search-report', [
             return res.status(404).json({ error: "Marksheet data not found!" });
         }
 
-        for (let i = 0; i < marksheetList.length; i++) {
-            console.log(i + 1);
-            marksheetList[i] = await handleOldOperation(marksheetList[i]);
-            console.log(marksheetList[i]);
+        // Format the data accordingly to the frontend requires
+        const marksheetArr = [];
+        for(let i = 0; i < marksheetList.length; i++) {
+            for(let y = 2017; y <= (new Date).getFullYear(); y++) {
+                for(let s = 1; s <= 6; s++) {
+                    let obj = await getFormatedDataForSearch(y, marksheetList[0].stream.toUpperCase(), s, rollNo, marksheetList[0].UID, marksheetList[0].phone, marksheetList[0].name, marksheetList[0].registrationNo);
+                    if(obj === null) { continue; }
+                    marksheetArr.push(obj);
+                }
+            }   
         }
+        console.log(marksheetArr.length);
+        
+        
 
-        const marksheetReportArr = [];
-        for (let i = 0; i < 6; i++) {
-            // Fetch the semester: i+1
-            let marksheet = marksheetList.find(element => (element.semester === i + 1 && element.status === 'P'));
-
-            // Skip for the marksheet for a particular semester if not found
-            if (!marksheet) { continue; }
-
-            // Create the semester report
-            let semesterReportObj = {
-                rollNo: marksheet.rollNo,
-                semester: marksheet.semester,
-                year: marksheet.year,
-                fullMarks: marksheet.fullMarksSum,
-                totalMarks: marksheet.totalMarksObtained,
-                credit: marksheet.totalCredit,
-                sgpa: marksheet.sgpa,
-                cgpa: marksheet.cgpa,
-                cummulativeCredit: marksheet.cummulativeCredit,
-                letterGrade: getLetterGrade((marksheet.totalMarksObtained * 100) / marksheet.fullMarksSum),
-                remarks: marksheet.remarks,
-                _id: marksheet._id
-            }
-
-            // Add the report to the report array
-            marksheetReportArr.push(semesterReportObj);
-        }
-
-        const index = marksheetReportArr.findIndex(element => element.semester == 6);
-        if (index !== -1) {
-            marksheetReportArr[index]["cummulativeCredit"] = 0;
-            for (let i = 0; i < marksheetReportArr.length; i++) {
-                marksheetReportArr[index]["cummulativeCredit"] += marksheetReportArr[i].credit;
-            }
-        }
-
-        return res.status(200).json(marksheetReportArr);
+        return res.status(200).json(marksheetArr);
 
     } catch (error) {
         console.error(error);
@@ -749,10 +797,10 @@ router.post('/get-all-reports', fetchuser, async (req, res) => {
     console.log(stream, Number(year));
     try {
         let marksheetList = await Marksheet.find({ year });
-        marksheetList = marksheetList.filter(element=>element.stream.toLowerCase()===stream.toLowerCase());
+        marksheetList = marksheetList.filter(element => element.stream.toLowerCase() === stream.toLowerCase());
 
         console.log(marksheetList.length)
-        if (marksheetList.length===0) {
+        if (marksheetList.length === 0) {
             return res.status(404).json({ error: "Data not found!" });
         }
 
@@ -817,36 +865,36 @@ router.post('/get-all-reports', fetchuser, async (req, res) => {
 
 
 // ROUTE 10: Get all the reports using: POST "/api/marksheet/search". Login required
-router.post('/search', fetchuser, async (req, res) => {
-    const { _id } = req.body;
+// router.post('/search', fetchuser, async (req, res) => {
+//     const { _id } = req.body;
 
-    try {
-        if (_id === null) {
-            return res.status(400).json({ error: "Please provide rollNo!" });
-        }
+//     try {
+//         if (_id === null) {
+//             return res.status(400).json({ error: "Please provide rollNo!" });
+//         }
 
-        // await handleOldOperation();
+//         // await handleOldOperation();
 
-        let marksheet = await Marksheet.findOne({ _id });
-        for (let i = 0; i < marksheet.subjects.length; i++) {
-            marksheet.subjects[i].tgp = Number(marksheet.subjects[i].tgp);
-            marksheet.subjects[i].year1 = Number(marksheet.subjects[i].year1);
+//         let marksheet = await Marksheet.findOne({ _id });
+//         for (let i = 0; i < marksheet.subjects.length; i++) {
+//             marksheet.subjects[i].tgp = Number(marksheet.subjects[i].tgp);
+//             marksheet.subjects[i].year1 = Number(marksheet.subjects[i].year1);
 
-            if (marksheet.stream.toUpperCase() === "BCOM") {
-                marksheet.subjects[i].year2 = Number(marksheet.subjects[i].year2);
-            }
-            else {
-                marksheet.subjects[i].practicalMarks = Number(marksheet.subjects[i].practicalMarks);
-            }
-        }
-        console.log(marksheet);
+//             if (marksheet.stream.toUpperCase() === "BCOM") {
+//                 marksheet.subjects[i].year2 = Number(marksheet.subjects[i].year2);
+//             }
+//             else {
+//                 marksheet.subjects[i].practicalMarks = Number(marksheet.subjects[i].practicalMarks);
+//             }
+//         }
+//         console.log(marksheet);
 
-        return res.status(200).json(marksheet);
-    } catch (error) {
-        console.log(error);
-        return res.status(200).json({ error: "Internal Server Error!" });
-    }
-})
+//         return res.status(200).json(marksheet);
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(200).json({ error: "Internal Server Error!" });
+//     }
+// })
 
 
 // ROUTE 11: Get the scanned marksheet using: POST "/api/marksheet/get-pdf". Login required

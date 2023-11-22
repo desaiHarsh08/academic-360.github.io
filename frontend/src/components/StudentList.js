@@ -1,7 +1,7 @@
 import React from 'react'
 
 const StudentList = (props) => {
-  console.log(props.data)
+  // console.log(props.data)
   return (
     <tr className=' border-2 border-black '>
       <td className='p-3 border-r-2 border-black w-[200px] text-center '>{props.data.registrationNo}</td>

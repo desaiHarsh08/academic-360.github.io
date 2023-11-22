@@ -66,7 +66,10 @@ const Settings = () => {
 
   const prepareAddSubject = () => {
     const subjectObj = JSON.parse(localStorage.getItem('subjectObj'));
-
+    if(addSubject?.subjectName==='') {
+      alert('Invalid Subject...!');
+      return;
+    }
     if (!subjectObj[0][addSubject?.stream.toLowerCase()][`sem${addSubject?.semester}`][addSubject?.course].includes(addSubject?.subjectName)) {
       subjectObj[0][addSubject?.stream.toLowerCase()][`sem${addSubject?.semester}`][addSubject?.course].push(addSubject?.subjectName)
       updateSubject(subjectObj[0]);
@@ -79,7 +82,10 @@ const Settings = () => {
 
   const prepareDeleteSubject = () => {
     const subjectObj = JSON.parse(localStorage.getItem('subjectObj'));
-
+    if(addSubject?.subjectName==='') {
+      alert('Invalid Subject...!');
+      return;
+    }
     if (!subjectObj[0][deleteSubject?.stream.toLowerCase()][`sem${deleteSubject?.semester}`][deleteSubject?.course].includes(deleteSubject?.subjectName)) {
       // subjectObj[0][obj?.stream.toLowerCase()][`sem${obj?.semester}`][obj?.course].push(obj?.subjectName)
       // updateSubject(subjectObj[0]);
@@ -88,7 +94,7 @@ const Settings = () => {
     else {
       const index = subjectObj[0][deleteSubject?.stream.toLowerCase()][`sem${deleteSubject?.semester}`][deleteSubject?.course].indexOf(deleteSubject?.subjectName);
       subjectObj[0][deleteSubject?.stream.toLowerCase()][`sem${deleteSubject?.semester}`][deleteSubject?.course].splice(index, 1);
-      console.log(subjectObj[0])
+      // console.log(subjectObj[0])
       updateSubject(subjectObj[0]);
     }
   }
@@ -97,13 +103,13 @@ const Settings = () => {
   const handleAddChange = (event) => {
     const { name, value } = event.target;
     setAddSubject((prev) => ({ ...prev, [name]: value }));
-    console.log(addSubject)
+    // console.log(addSubject)
   }
 
   const handleDeleteChange = (event) => {
     const { name, value } = event.target;
     setDeleteSubject((prev) => ({ ...prev, [name]: value }));
-    console.log(deleteSubject)
+    // console.log(deleteSubject)
   }
 
   const handleChangePassword = async () => {
@@ -120,9 +126,10 @@ const Settings = () => {
       alert("New Password and confirm password doesn't match");
       return;
     }
+    // console.log(email, newPassword, cPassword);
 
     setLoading(true);
-
+// console.log(`${host}/api/auth/update`)
     const res = await fetch(`${host}/api/auth/update`, {
       method: 'POST',
       headers: {
@@ -131,13 +138,13 @@ const Settings = () => {
       },
       body: JSON.stringify({
         email: email,
-        pasword: newPassword
+        password: cPassword
       })
     });
 
     setLoading(false);
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     if (data.message) {
       alert('Password Updated!');
     }

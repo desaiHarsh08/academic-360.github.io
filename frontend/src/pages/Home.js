@@ -17,7 +17,7 @@ const Home = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('fired');
+    // console.log('fired');
     if(document.getElementById('email').value==='' || document.getElementById('password').value==='') {
       alert('Please enter the fields');
     }
@@ -38,7 +38,7 @@ const Home = () => {
     })
 
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     setLoading(false);
     if(data.error) { alert(data.error); return; }
     else if (data) {
@@ -50,9 +50,9 @@ const Home = () => {
   }
 
   const handleSuccess = async (credentialResponse) => {
-    console.log(credentialResponse)
+    // console.log(credentialResponse)
     const userObject = jwt_decode(credentialResponse.credential);
-    console.log(userObject);
+    // console.log(userObject);
 
     localStorage.setItem('email', userObject.email);
     localStorage.setItem('name', userObject.name);

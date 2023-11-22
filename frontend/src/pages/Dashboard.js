@@ -68,7 +68,7 @@ const Dashboard = () => {
 
   window.addEventListener('resize', (e) => {
     const left = document.getElementById('left');
-    if (window.innerWidth > 767) {
+    if (window.innerWidth > 767 && left!==null) {
       left.classList.remove('top-[63px]');
       left.classList.add('top-0');
     }

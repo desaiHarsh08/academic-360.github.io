@@ -165,7 +165,7 @@ const handleDownload = (data) => {
       [name]: value,
     }));
     filterStudents.semester = Number(document.getElementById('semester').value)
-    console.log(filterStudents);
+    // console.log(filterStudents);
   };
 
   const handleStudentFilter = async () => {
@@ -186,7 +186,7 @@ const handleDownload = (data) => {
     });
     const data = await res.json();
     setLoading(false);
-    console.log(data, data.length);
+    // console.log(data, data.length);
     if(data.length===0) {
       alert('No data found!');
       return;
@@ -198,7 +198,7 @@ const handleDownload = (data) => {
 
     const element = [];
     for (let i = 0; i < data.length; i++) {
-      console.log(i);
+      // console.log(i);
       element.push(
         <StudentList
           key={i}
@@ -237,7 +237,7 @@ const handleDownload = (data) => {
         </div>
 
         {/* Display all the subjects */}
-        <div id="display-subjects" className='pt-7'>
+        <div id="display-subjects" className='pt-7 '>
           <div className='w-full flex justify-between border p-2 items-center'>
             <h3 className='text-2xl font-semibold '>Subject List</h3>
             <div>
@@ -245,7 +245,7 @@ const handleDownload = (data) => {
             </div>
           </div>
 
-          <div className='w-full hidden transition-all' id='list-container' >
+          <div className='w-full overflow-x-auto hidden transition-all' id='list-container' >
             {subjectList}
           </div>
         </div>
@@ -259,7 +259,7 @@ const handleDownload = (data) => {
 
               <hr className='my-9 border-slate-300' />
               <div className="row flex flex-col sm:flex-row gap-1 md:gap-7  ">
-                <div id="stream-field" className='flex gap-3 sm:items-center  my-1 sm:w-1/4 flex-col sm:flex-row'>
+                <div id="stream-field" className='flex gap-3 flex-col sm:items-center my-1 sm:w-1/4'>
                   <div className=''>
                     <label htmlFor="stream">Stream</label>
                   </div>
@@ -312,7 +312,7 @@ const handleDownload = (data) => {
           {
             studentList.length > 0 ?
               <div id="display-table" className='w-full my-5 overflow-x-scroll'>
-                <table className="border-2 border-black w-[3800px] ">
+                <table className="border-2 border-black min-w-[3800px] ">
                   <thead className='w-[3800px]   '>
                     <tr className='bg-slate-100 w-[3800px] '>
                       <th className='p-3 border-r-2 border-black w-[200px] text-center '>Registration No.</th>

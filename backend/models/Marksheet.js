@@ -66,6 +66,14 @@ const MarksheetSchema = new Schema({
   },
   fullMarksSum: {
     type: Number
+  },
+  UID: {
+    type: String,
+    default: ''
+  },
+  phone: {
+    type: String,
+    default: ''
   }
 });
 

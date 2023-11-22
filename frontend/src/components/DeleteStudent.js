@@ -13,7 +13,7 @@ const DeleteStudent = () => {
       semester: Number(document.getElementById('semester').value),
       year: document.getElementById('year').value,
     }
-    console.log(obj);
+    // console.log(obj);
 
     if(obj.rollNo==='' || obj.semester==='' || obj.year==='') {
       alert('Please enter valid fields...!');
@@ -30,7 +30,7 @@ const DeleteStudent = () => {
     });
     const data = await res.json();
     setLoading(false);
-    console.log(data);
+    // console.log(data);
     if(data?.message) {
       alert(data?.message);
     }

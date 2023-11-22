@@ -36,7 +36,7 @@ const GetAllReports = () => {
     const getReports = async (e) => {
         e.preventDefault();
         setLoading(true);
-        console.log(search)
+        // console.log(search)
         try {
             const res = await fetch(`${host}/api/marksheet/get-all-reports`, {
                 method: 'POST',
@@ -79,7 +79,7 @@ const GetAllReports = () => {
     }
 
     const handleDownload = (data) => {
-        console.log(data)
+        // console.log(data)
         downloadExcel(data, `${search.stream.toUpperCase()}-${search.year}.xlsx`);
     }
 

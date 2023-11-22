@@ -206,7 +206,7 @@ const AddStudent = () => {
 
   }
 
-  useEffect(() => { console.log(marksheet) }, [marksheet])
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -272,7 +272,7 @@ const AddStudent = () => {
         }
       }
     }
-    console.log(subjectArr);
+    // console.log(subjectArr);
     return subjectArr;
   }
 
@@ -288,7 +288,7 @@ const AddStudent = () => {
   }
 
   const handleSubjectEdit = (subjectName) => {
-    console.log(subjectName);
+    // console.log(subjectName);
 
     let obj = {
       subjectName: document.getElementById(`subjectName-${subjectName}`).value,
@@ -325,8 +325,8 @@ const AddStudent = () => {
       document.getElementById(`status-${subjectName}`).value = "F";
     }
 
-    console.log("obj: ", obj);
-    console.log("marksheet: ", marksheet);
+    // console.log("obj: ", obj);
+    // console.log("marksheet: ", marksheet);
 
     const index = marksheet.subjects.findIndex(element => element.subjectName === obj.subjectName);
     marksheet.subjects[index] = obj;
@@ -337,8 +337,8 @@ const AddStudent = () => {
     // Remove from the view
     document.getElementById(`${subjectName}`).style.display = 'none';
     const updatedAddSubjectRow = addSubjectRow.filter((subject) => subject.key !== subjectName);
-    console.log(updatedAddSubjectRow)
-    console.log("key: ", addSubjectRow)
+    // console.log(updatedAddSubjectRow)
+    // console.log("key: ", addSubjectRow)
     //  for(let i = 0; i < addSubjectRow.length; i++) {
     //   console.log("key: ", addSubjectRow[i].id)
     //  }
@@ -351,7 +351,7 @@ const AddStudent = () => {
 
     // setAddSubjectRow()
 
-    console.log(marksheet.subjects);
+    // console.log(marksheet.subjects);
   }
 
   const handleAddSubjectRow = () => {

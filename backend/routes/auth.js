@@ -152,7 +152,7 @@ router.get('/getuser', fetchuser, async (req, res) => {
 
 
 // ROUTE 4: Change user password using POST "/api/auth/update". Login required
-router.get('/update', fetchuser, [
+router.post('/update', fetchuser, [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password cannot be blank!').exists()
 ], fetchuser, async (req, res) => {

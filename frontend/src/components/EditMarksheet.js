@@ -111,9 +111,9 @@ const EditMarksheet = () => {
     }
 
     const handleSubjectEdit = (subjectName) => {
-        console.log(subjectName);
+        // console.log(subjectName);
         const index = marksheet.subjects.findIndex(element => element.subjectName === subjectName);
-        console.log(index);
+        // console.log(index);
         let subjectObj = marksheet.subjects[index];
 
         subjectObj = {
@@ -152,7 +152,7 @@ const EditMarksheet = () => {
 
     const handleViewSubjects = () => {
         const subjects = marksheet.subjects;
-        console.log(subjects);
+        // console.log(subjects);
         const element = [];
         for (let i = 0; i < subjects.length; i++) {
             element.push(
